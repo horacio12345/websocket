@@ -106,7 +106,7 @@ class WebSocketServer:
         
         logger.info("🛑 WebSocket Server detenido")
     
-    async def handle_client(self, websocket, path):
+    async def handle_client(self, websocket):
         """Maneja una nueva conexión de cliente"""
         client_ip = websocket.remote_address[0]
         

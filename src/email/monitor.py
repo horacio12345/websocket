@@ -1,6 +1,6 @@
 # src/email/monitor.py
 import imaplib
-import email
+import email as email_lib
 import asyncio
 import threading
 import time
@@ -207,7 +207,7 @@ class EmailMonitor:
                 return
             
             # Parsear email
-            email_body = email.message_from_bytes(msg_data[0][1])
+            email_body = email_lib.message_from_bytes(msg_data[0][1])
             
             # Procesar con EmailProcessor
             email_data = self.processor.process_email(email_body, msg_id)
@@ -250,6 +250,7 @@ class EmailMonitor:
         """Prueba la conexión IMAP"""
         try:
             mail = self._connect_imap()
+            mail.select("INBOX")  # ← AGREGAR ESTA LÍNEA
             mail.close()
             mail.logout()
             logger.info("✅ Conexión IMAP exitosa")

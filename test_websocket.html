@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>📧 Complete Email Monitor Test</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f7fa; 
+            color: #2c3e50;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .connected { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .connecting { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .disconnected { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        
+        .auth-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .auth-section h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e1e8ed;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .form-group input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .btn:hover { background: #2980b9; }
+        .btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+        .btn-danger { background: #e74c3c; }
+        .btn-danger:hover { background: #c0392b; }
+        
+        .messages-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .messages-header {
+            background: #34495e;
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+        .messages-container {
+            padding: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .message {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            background: #f8f9fa;
+        }
+        .email-message {
+            border-left-color: #27ae60;
+            background: #eafaf1;
+            border: 1px solid #d5f4e6;
+        }
+        .email-full {
+            background: white;
+            border: 2px solid #27ae60;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 12px;
+        }
+        .email-header {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .email-header strong {
+            color: #2c3e50;
+        }
+        .security-flags {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .security-flag {
+            background: #f39c12;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin: 2px;
+            display: inline-block;
+            font-size: 12px;
+        }
+        .attachments-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .attachment-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .attachment-info {
+            flex-grow: 1;
+        }
+        .attachment-download {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .attachment-download:hover {
+            background: #218838;
+        }
+        .email-content {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .metadata {
+            background: #e8f4f8;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+        .debug-section {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📧 Complete Email Monitor Test</h1>
+        
+        <div id="status" class="status disconnected">🔴 Disconnected</div>
+        
+        <div class="auth-section">
+            <h3>🔐 Authentication</h3>
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" value="admin" placeholder="admin">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" value="admin123" placeholder="admin123">
+            </div>
+            <button class="btn" onclick="connect()">🔌 Connect</button>
+            <button class="btn btn-danger" onclick="disconnect()">🚪 Disconnect</button>
+            <button class="btn" onclick="clearMessages()" style="background: #f39c12;">🗑️ Clear</button>
+        </div>
+        
+        <div class="messages-section">
+            <h3 class="messages-header">📨 Real-time Messages & Email Data</h3>
+            <div class="messages-container" id="messages-container">
+                <div class="message">Waiting for connection...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let isAuthenticated = false;
+        let emailCount = 0;
+        
+        const statusEl = document.getElementById('status');
+        const messagesEl = document.getElementById('messages-container');
+        
+        function updateStatus(text, className) {
+            statusEl.textContent = text;
+            statusEl.className = `status ${className}`;
+        }
+        
+        function addMessage(message, isEmail = false) {
+            const div = document.createElement('div');
+            div.className = isEmail ? 'message email-message' : 'message';
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong> - ${message}`;
+            messagesEl.appendChild(div);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+        
+        function addFullEmail(emailData) {
+            emailCount++;
+            const div = document.createElement('div');
+            div.className = 'email-full';
+            
+            // Decode subject if needed
+            const subject = emailData.subject || 'No Subject';
+            const decodedSubject = subject.includes('=?') ? 
+                'Encoded: ' + subject : subject;
+            
+            // Security flags
+            let securityFlagsHtml = '';
+            if (emailData.security_flags && emailData.security_flags.length > 0) {
+                securityFlagsHtml = `
+                    <div class="security-flags">
+                        <strong>⚠️ Security Alerts:</strong><br>
+                        ${emailData.security_flags.map(flag => 
+                            `<span class="security-flag">${flag}</span>`
+                        ).join('')}
+                    </div>
+                `;
+            }
+            
+            // Attachments
+            let attachmentsHtml = '';
+            if (emailData.attachments && emailData.attachments.length > 0) {
+                attachmentsHtml = `
+                    <div class="attachments-section">
+                        <strong>📎 Attachments (${emailData.attachments.length}):</strong>
+                        ${emailData.attachments.map((att, index) => `
+                            <div class="attachment-item">
+                                <div class="attachment-info">
+                                    <strong>${att.filename}</strong><br>
+                                    <small>Type: ${att.content_type} | Size: ${(att.size/1024).toFixed(1)}KB | Safe: ${att.is_safe ? '✅' : '❌'}</small><br>
+                                    <small>Hash: ${att.hash ? att.hash.substring(0, 16) + '...' : 'N/A'}</small>
+                                </div>
+                                ${att.data ? 
+                                    `<button class="attachment-download" onclick="downloadAttachment('${att.filename}', '${att.content_type}', '${att.data}')">
+                                        ⬇️ Download
+                                    </button>` : 
+                                    '<span style="color: #dc3545; font-size: 12px;">File too large</span>'
+                                }
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            // Images
+            let imagesHtml = '';
+            if (emailData.images && emailData.images.length > 0) {
+                imagesHtml = `
+                    <div class="attachments-section">
+                        <strong>🖼️ Images (${emailData.images.length}):</strong>
+                        ${emailData.images.map(img => `
+                            <div class="attachment-item">
+                                <div class="attachment-info">
+                                    <strong>${img.filename}</strong><br>
+                                    <small>Type: ${img.content_type} | Size: ${(img.size/1024).toFixed(1)}KB</small>
+                                </div>
+                                <button class="attachment-download" onclick="downloadAttachment('${img.filename}', '${img.content_type}', '${img.data}')">
+                                    ⬇️ Download
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            div.innerHTML = `
+                <h4>📧 Email #${emailCount} - ${new Date().toLocaleTimeString()}</h4>
+                
+                <div class="email-header">
+                    <strong>Subject:</strong> ${decodedSubject}<br>
+                    <strong>From:</strong> ${emailData.sender || 'Unknown'}<br>
+                    <strong>To:</strong> ${emailData.to || 'Unknown'}<br>
+                    ${emailData.cc ? `<strong>CC:</strong> ${emailData.cc}<br>` : ''}
+                    <strong>Date:</strong> ${emailData.date || new Date(emailData.timestamp * 1000).toLocaleString()}<br>
+                    <strong>ID:</strong> ${emailData.id}
+                </div>
+                
+                ${securityFlagsHtml}
+                ${attachmentsHtml}
+                ${imagesHtml}
+                
+                <div class="metadata">
+                    <strong>📊 Metadata:</strong> 
+                    Raw Size: ${emailData.raw_size || 'Unknown'} bytes | 
+                    Timestamp: ${emailData.timestamp} | 
+                    Processed: ${new Date().toISOString()}
+                </div>
+                
+                ${emailData.text_content ? `
+                    <div>
+                        <strong>📄 Text Content:</strong>
+                        <div class="email-content">${emailData.text_content}</div>
+                    </div>
+                ` : ''}
+                
+                ${emailData.html_content ? `
+                    <div>
+                        <strong>🌐 HTML Content:</strong>
+                        <div class="email-content">${emailData.html_content.substring(0, 1000)}${emailData.html_content.length > 1000 ? '...' : ''}</div>
+                    </div>
+                ` : ''}
+                
+                <div class="debug-section">
+                    <strong>🔍 Full JSON Data:</strong><br>
+                    ${JSON.stringify(emailData, null, 2)}
+                </div>
+            `;
+            
+            messagesEl.appendChild(div);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+        
+        function downloadAttachment(filename, contentType, hexData) {
+            try {
+                addMessage(`⬇️ Downloading: ${filename}`);
+                const bytes = new Uint8Array(hexData.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+                const blob = new Blob([bytes], { type: contentType });
+                const url = window.URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                window.URL.revokeObjectURL(url);
+                addMessage(`✅ Downloaded successfully: ${filename}`);
+            } catch (error) {
+                addMessage(`❌ Download failed: ${error.message}`);
+                console.error('Download error:', error);
+            }
+        }
+        
+        function clearMessages() {
+            messagesEl.innerHTML = '<div class="message">Messages cleared...</div>';
+            emailCount = 0;
+        }
+        
+        function connect() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                alert('Please enter username and password');
+                return;
+            }
+            
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.close();
+            }
+            
+            updateStatus('🟡 Connecting...', 'connecting');
+            addMessage('🔌 Connecting to WebSocket server...');
+            
+            try {
+                ws = new WebSocket('ws://localhost:8765');
+                
+                ws.onopen = function() {
+                    updateStatus('🟡 Connected - Waiting for auth...', 'connecting');
+                    addMessage('✅ WebSocket connected, waiting for authentication request...');
+                };
+                
+                ws.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        console.log('📨 RECEIVED MESSAGE:', data);
+                        
+                        switch(data.type) {
+                            case 'auth_required':
+                                addMessage('🔐 Authentication required, sending credentials...');
+                                ws.send(JSON.stringify({
+                                    type: 'login',
+                                    username: username,
+                                    password: password
+                                }));
+                                break;
+                                
+                            case 'auth_success':
+                                isAuthenticated = true;
+                                updateStatus('🟢 Connected & Authenticated', 'connected');
+                                addMessage(`✅ Successfully authenticated as: <strong>${data.user?.username || username}</strong>`);
+                                if (data.user?.permissions) {
+                                    addMessage(`🎯 Permissions: <strong>${data.user.permissions.join(', ')}</strong>`);
+                                }
+                                addMessage('📧 <strong>Ready to receive emails!</strong>');
+                                break;
+                                
+                            case 'auth_failed':
+                                isAuthenticated = false;
+                                updateStatus('🔴 Authentication Failed', 'disconnected');
+                                addMessage(`❌ Authentication failed: ${data.message}`);
+                                break;
+                                
+                            case 'new_email':
+                                addMessage('🎉 <strong>NEW EMAIL RECEIVED!</strong> Processing complete data...');
+                                addFullEmail(data);
+                                break;
+                                
+                            case 'pong':
+                                addMessage('🏓 Pong received - Connection alive');
+                                break;
+                                
+                            case 'error':
+                                addMessage(`❌ Server error: ${data.message}`);
+                                break;
+                                
+                            default:
+                                addMessage(`📨 Unknown message type: ${data.type}`);
+                                console.log('Unknown message:', data);
+                                break;
+                        }
+                    } catch (error) {
+                        addMessage(`❌ Error parsing message: ${error}`);
+                        console.error('Parse error:', error, 'Raw data:', event.data);
+                    }
+                };
+                
+                ws.onclose = function(event) {
+                    isAuthenticated = false;
+                    updateStatus('🔴 Disconnected', 'disconnected');
+                    addMessage(`🔌 WebSocket closed: Code ${event.code} - ${event.reason || 'No reason provided'}`);
+                };
+                
+                ws.onerror = function(error) {
+                    updateStatus('🔴 Connection Error', 'disconnected');
+                    addMessage(`❌ WebSocket error: ${error}`);
+                    console.error('WebSocket error:', error);
+                };
+                
+            } catch (error) {
+                updateStatus('🔴 Connection Error', 'disconnected');
+                addMessage(`❌ Failed to create WebSocket: ${error}`);
+            }
+        }
+        
+        function disconnect() {
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+            isAuthenticated = false;
+            updateStatus('🔴 Disconnected', 'disconnected');
+            addMessage('🔌 Manually disconnected');
+        }
+        
+        // Send ping every 30 seconds when connected
+        setInterval(() => {
+            if (ws && ws.readyState === WebSocket.OPEN && isAuthenticated) {
+                ws.send(JSON.stringify({type: 'ping'}));
+                addMessage('🏓 Ping sent');
+            }
+        }, 30000);
+        
+        // Auto-connect on page load
+        window.addEventListener('load', () => {
+            addMessage('🚀 <strong>Complete Email Monitor Test loaded!</strong>');
+            addMessage('📋 This interface shows ALL email data including attachments, security flags, and complete metadata.');
+            addMessage('🔌 Click Connect to start monitoring emails in real-time.');
+        });
+    </script>
+</body>
+</html>

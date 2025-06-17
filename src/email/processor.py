@@ -273,7 +273,7 @@ class EmailProcessor:
         
         # Decodificar headers encoded
         try:
-            decoded_header = email.header.decode_header(header)
+            decoded_header = email_lib.header.decode_header(header)
             decoded_text = ""
             
             for text, encoding in decoded_header:

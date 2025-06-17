@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Email Monitor - Punto de entrada principal
-Sistema de monitoreo de emails en tiempo real con WebSocket seguro
+Email Monitor - Main entry point
+Real-time email monitoring system with secure WebSocket
 
 Usage:
-    python main.py              # Modo normal
-    python main.py --debug      # Modo debug
-    python main.py --config PATH # Configuración personalizada
+    python3 main.py              # Normal mode
+    python3 main.py --debug      # Debug mode
+    python3 main.py --config PATH # Custom configuration
 """
 
 import sys
@@ -14,111 +14,118 @@ import os
 import argparse
 from pathlib import Path
 
-# Agregar el directorio src al path
+# Add src directory to Python path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 def parse_arguments():
-    """Parsea argumentos de línea de comandos"""
+    """Parse command line arguments"""
     parser = argparse.ArgumentParser(
-        description="Email Monitor - Sistema de monitoreo de emails en tiempo real"
+        description="Email Monitor - Real-time email monitoring system"
     )
     
     parser.add_argument(
         "--debug",
         action="store_true",
-        help="Ejecutar en modo debug"
+        help="Run in debug mode"
     )
     
     parser.add_argument(
         "--config",
         type=str,
-        help="Ruta al archivo de configuración .env"
+        help="Path to .env configuration file"
     )
     
     parser.add_argument(
         "--test-email",
         action="store_true",
-        help="Solo probar conexión de email y salir"
+        help="Only test email connection and exit"
     )
     
     parser.add_argument(
         "--version",
         action="store_true",
-        help="Mostrar versión y salir"
+        help="Show version and exit"
     )
     
     return parser.parse_args()
 
 def setup_environment(args):
-    """Configura el entorno según los argumentos"""
+    """Setup environment according to arguments"""
     
-    # Configurar archivo .env personalizado
+    # Configure custom .env file
     if args.config:
         config_path = Path(args.config)
         if not config_path.exists():
-            print(f"❌ Archivo de configuración no encontrado: {config_path}")
+            print(f"❌ Configuration file not found: {config_path}")
             sys.exit(1)
         os.environ["ENV_FILE"] = str(config_path)
     
-    # Configurar modo debug
+    # Configure debug mode
     if args.debug:
         os.environ["DEBUG"] = "true"
         os.environ["LOG_LEVEL"] = "DEBUG"
-        print("🐛 Modo DEBUG activado")
+        print("🐛 DEBUG mode activated")
 
 async def test_email_connection():
-    """Prueba solo la conexión de email"""
-    from src.core.config import config
-    from src.email import create_email_monitor
-    
-    print(f"🔍 Probando conexión a {config.email.server}:{config.email.port}")
-    print(f"👤 Usuario: {config.email.username}")
-    
-    monitor = create_email_monitor(config.email)
-    
-    if monitor.test_connection():
-        print("✅ Conexión de email exitosa")
-        return True
-    else:
-        print("❌ Error de conexión de email")
+    """Test email connection only"""
+    try:
+        from core.config import config
+        from email_system import create_email_monitor
+        
+        print(f"🔍 Testing connection to {config.email.server}:{config.email.port}")
+        print(f"👤 User: {config.email.username}")
+        
+        monitor = create_email_monitor(config.email)
+        
+        if monitor.test_connection():
+            print("✅ Email connection successful")
+            return True
+        else:
+            print("❌ Email connection error")
+            return False
+    except Exception as e:
+        print(f"❌ Error testing email connection: {e}")
         return False
 
 def main():
-    """Función principal"""
+    """Main function"""
     args = parse_arguments()
     
-    # Mostrar versión
+    # Show version
     if args.version:
-        from src.core.constants import VERSION, BUILD_DATE
-        print(f"Email Monitor v{VERSION} ({BUILD_DATE})")
+        try:
+            from core.constants import VERSION, BUILD_DATE
+            print(f"Email Monitor v{VERSION} ({BUILD_DATE})")
+        except ImportError:
+            print("Email Monitor v1.0.0")
         sys.exit(0)
     
-    # Configurar entorno
+    # Setup environment
     setup_environment(args)
     
-    # Solo probar email
+    # Only test email
     if args.test_email:
         import asyncio
         success = asyncio.run(test_email_connection())
         sys.exit(0 if success else 1)
     
-    # Ejecutar aplicación principal
+    # Run main application
     try:
         import asyncio
-        from src.main import main as app_main
+        from main import main as app_main
         
-        print("🚀 Iniciando Email Monitor...")
+        print("🚀 Starting Email Monitor...")
         asyncio.run(app_main())
         
     except ImportError as e:
-        print(f"❌ Error de importación: {e}")
-        print("💡 Asegúrate de que todas las dependencias están instaladas:")
-        print("   pip install -r requirements.txt")
+        print(f"❌ Import error: {e}")
+        print("💡 Make sure all dependencies are installed:")
+        print("   pip3 install -r requirements.txt")
         sys.exit(1)
     except KeyboardInterrupt:
-        print("\n🛑 Aplicación interrumpida por el usuario")
+        print("\n🛑 Application interrupted by user")
     except Exception as e:
-        print(f"❌ Error fatal: {e}")
+        print(f"❌ Fatal error: {e}")
         if args.debug:
             import traceback
             traceback.print_exc()
