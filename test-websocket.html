@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test WebSocket Email Monitor</title>
+</head>
+<body>
+    <h1>Test WebSocket</h1>
+    <div id="status">Desconectado</div>
+    <div id="messages"></div>
+    
+    <script>
+        const ws = new WebSocket('ws://localhost:8765');
+        const status = document.getElementById('status');
+        const messages = document.getElementById('messages');
+        
+        ws.onopen = function() {
+            status.textContent = '🟢 Conectado - Esperando autenticación...';
+        };
+        
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            console.log('Recibido:', data);
+            
+            if (data.type === 'auth_required') {
+                status.textContent = '🔐 Autenticación requerida';
+                // Enviar credenciales de admin
+                ws.send(JSON.stringify({
+                    type: 'login',
+                    username: 'admin',
+                    password: 'admin123'
+                }));
+            } else if (data.type === 'auth_success') {
+                status.textContent = '✅ Autenticado exitosamente';
+            } else if (data.type === 'new_email') {
+                messages.innerHTML += `<div>📧 Nuevo email: ${data.subject}</div>`;
+            }
+        };
+        
+        ws.onclose = function() {
+            status.textContent = '🔴 Desconectado';
+        };
+        
+        ws.onerror = function(error) {
+            status.textContent = '❌ Error: ' + error;
+        };
+    </script>
+</body>
+</html>
