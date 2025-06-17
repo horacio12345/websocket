@@ -2,7 +2,7 @@
 
 Real-time email monitoring system with secure WebSocket and JWT authentication.
 
-## 🏗️ Production Architecture
+## 🏗️ Architecture
 
 ### Complete Project Structure
 ```
